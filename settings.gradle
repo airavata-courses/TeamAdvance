@@ -1,2 +1,3 @@
-rootProject.name = 'finch'
+rootProject.name = 'TeamFinch'
+include 'core'
 
