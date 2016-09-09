@@ -2,7 +2,7 @@
 
 Finch is open source project which use Amazon Next Generation Weather Radar(NEXRAD) to predict severe weather conditions.
 
-## Milestons
+## Milestones
 - Milestone 1 :
 - Milestone 2 :
 - Milestone 3 :
