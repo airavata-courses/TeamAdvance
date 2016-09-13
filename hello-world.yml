@@ -1,0 +1,26 @@
+template: Hello, %s!
+defaultName: Stranger
+
+
+# Logging settings.
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+#  # Logger-specific levels.
+#  loggers:
+#
+#    # Overrides the level of com.example.dw.Thing and sets it to DEBUG.
+#    "com.example.dw.Thing": DEBUG
+#
+#    # Enables the SQL query log and redirect it to a separate file
+#    "org.hibernate.SQL":
+#      level: DEBUG
+#      # This line stops org.hibernate.SQL (or anything under it) from using the root logger
+#      additive: false
+#      appenders:
+#        - type: file
+#          currentLogFilename: ./logs/example-sql.log
+#          archivedLogFilenamePattern: ./logs/example-sql-%d.log.gz
+#          archivedFileCount: 5

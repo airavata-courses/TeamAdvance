@@ -25,13 +25,9 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import edu.iu.finch.core.NexRad;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -47,7 +43,7 @@ public class Main {
 
         S3Object s3Object = nexRad.getS3Object("2016/01/01/FOP1/FOP120160101_000203_V07.gz");
         System.out.println(s3Object);
-        System.out.println(s3Object.getObjectMetadata());
+//        System.out.println(s3Object.getObjectMetadata());
         S3ObjectInputStream s3InputStream = s3Object.getObjectContent();
 
         //print(s3InputStream);

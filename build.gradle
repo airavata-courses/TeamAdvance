@@ -1,30 +1,58 @@
 group 'edu.iu.finch'
-version '0.1-SNAPSHOT'
-description 'Team Finch Project'
+version '0.0.1-SNAPSHOT'
+description 'Finch Project'
 
 apply plugin: 'java'
 apply plugin: 'idea'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
+//    maven { url "http://oss.sonatype.org/content/repositories/snapshots" }
     mavenCentral()
+}
+project.ext {
+    dropwizardVersion = '1.0.0'
 }
 
 dependencies {
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.11'
-    testCompile group: 'org.testng', name: 'testng', version: '6.9.10'
+    compile (
+            'io.dropwizard:dropwizard-core:' + dropwizardVersion,
+            'io.dropwizard.metrics:metrics-annotation:3.1.2',
+            'io.dropwizard.metrics:metrics-healthchecks:3.1.2',
+            'org.hibernate:hibernate-validator:5.2.4.Final',
+            'com.fasterxml.jackson.core:jackson-annotations:2.7.6',
+            'com.amazonaws:aws-java-sdk-s3:1.11.11',
+            'org.slf4j:slf4j-api:1.7.10'
+    )
+
+    testCompile 'org.testng:testng:6.9.10'
 }
 
 task listJars << {
     configurations.compile.each { File file -> println file.name}
 }
 
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    manifest {
+        attributes 'Main-Class': 'edu.iu.finch.HelloWorldApplication',
+                    'Implementation-Version': version
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task main(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'edu.iu.finch.Main'
+}
+
 task run(type: JavaExec){
     classpath = sourceSets.main.runtimeClasspath
-
-    main = 'edu.iu.finch.Main'
-
+    main = 'edu.iu.finch.HelloWorldApplication'
+    args 'server', 'hello-world.yml'
 }
 
 task wrapper(type: Wrapper){
