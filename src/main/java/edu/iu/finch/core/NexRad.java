@@ -32,9 +32,14 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.nc2.NetcdfFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 /**
  * This class represent the Amazon NEXRAD data set.
@@ -49,7 +54,7 @@ public class NexRad {
         init(new AnonymousAWSCredentials());
     }
 
-    public NexRad(AWSCredentials credentials){
+    public NexRad(AWSCredentials credentials) {
         init(credentials);
     }
 
@@ -59,7 +64,7 @@ public class NexRad {
         s3Client.setRegion(region);
     }
 
-    public List<S3ObjectSummary> listBucket(String key){
+    public List<S3ObjectSummary> listBucket(String key) {
         ObjectListing listing = s3Client.listObjects(BUCKET_NAME, key);
         List<S3ObjectSummary> summaries = listing.getObjectSummaries();
 
@@ -67,27 +72,61 @@ public class NexRad {
             listing = s3Client.listNextBatchOfObjects(listing);
             summaries.addAll(listing.getObjectSummaries());
         }
-
         return summaries;
     }
 
     /**
      * key eg:  2015/05/15/KVWX/KVWX20150515_080737_V06.gz
+     *
      * @param key
      * @return
      */
     private S3Object getS3Object(String key) {
-        S3Object s3object = s3Client.getObject(new GetObjectRequest(BUCKET_NAME, key ));
-        return s3object;
+        return s3Client.getObject(new GetObjectRequest(BUCKET_NAME, key));
     }
 
     public InputStream getS3InputStream(String key) {
         return getS3Object(key).getObjectContent();
     }
 
-    public NexRadData getData(String key){
+    public NexRadData getData(String key) {
+        throw new IllegalArgumentException("Not yet Implemented");
+    }
 
-        return null;
+    /**
+     * This method returns the netcdf file represent by given S3 key;
+     * First we read the S3 object using the key and read the content as InputStream
+     * Second we copy S3InputStream to ByteArrayOutputStream : data is in gunzip compressed format
+     * Third we use GZIPInputStream to decode data and write it to new ByteArrayOutputStream
+     * Forth, use this decode output stream to generate inmemeory Netcdf File.
+     * @param key
+     * @return
+     */
+    public NetcdfFile getNetcdfFile(String key) throws FinchException {
+        InputStream s3InputStream = getS3InputStream(key);
+        NetcdfFile netcdfFile = null;
+        try (ByteArrayOutputStream encodeOutputStream = new ByteArrayOutputStream()) {
+            int len;
+            byte[] buf = new byte[2048];
+            while ((len = s3InputStream.read(buf)) != -1) {
+                encodeOutputStream.write(buf, 0, len);
+            }
+            try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(encodeOutputStream.toByteArray()));
+                 ByteArrayOutputStream decodeOutputStream = new ByteArrayOutputStream()) {
+
+                while ((len = gzip.read(buf)) != -1) {
+                    decodeOutputStream.write(buf, 0, len);
+                }
+
+                netcdfFile = NetcdfFile.openInMemory(key, decodeOutputStream.toByteArray());
+            }
+
+            netcdfFile.close();
+        } catch (IOException e) {
+            log.error("Error while converting S3InputStream to in memory Netcdf File");
+            throw new FinchException("S3InputStream -> inmemory Netcdf file, conversion error");
+        }
+        return netcdfFile;
     }
 
 }

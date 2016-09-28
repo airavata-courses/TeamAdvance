@@ -20,52 +20,66 @@
  */
 package edu.iu.finch;
 
-import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import edu.iu.finch.core.FinchException;
 import edu.iu.finch.core.NexRad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
-
-    public static void main(String[] args) throws IOException {
-        System.out.println("Hello from Finch!");
-        NexRad nexRad = new NexRad();
-
-        List<S3ObjectSummary> summaries = nexRad.listBucket("2016/01/01/FOP1");
-        System.out.println(summaries.size());
-        System.out.println(summaries.get(0));
-
-        String key = "2016/01/01/FOP1/FOP120160101_000203_V07.gz";
-        nexRad.getData(key);
-
-        //print(s3InputStream);
-
+    private final NexRad nexRad;
+    public Main() {
+        nexRad = new NexRad();
     }
 
-    private static void print(S3ObjectInputStream s3InputStream) throws IOException {
-        byte[] buff = new byte[1024];
-        ByteArrayOutputStream original = new ByteArrayOutputStream();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        int len = -1;
-        while((len = s3InputStream.read(buff)) != -1){
-            original.write(buff, 0, len);
-        }
-        GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(original.toByteArray()));
-        original.close();
+    public static void main(String[] args) throws IOException, FinchException {
+        System.out.println("Hello from Finch!");
+        Main main = new Main();
+        String key = "2016/01/01/FOP1/FOP120160101_000203_V07.gz";
+        List<Variable> variables = main.readAllVaribales(key);
 
-        while ((len = gunzip.read(buff)) != -1) {
-            outputStream.write(buff, 0, len);
+        variables.stream().forEach(e -> System.out.println(e.getShortName()));
+    }
+
+    private List<Variable> readAllVaribales(String key) throws FinchException {
+        NetcdfFile netcdfFile = nexRad.getNetcdfFile(key);
+        return netcdfFile.getVariables();
+    }
+
+    private void printSummarCount(String key) {
+        List<S3ObjectSummary> s3ObjectSummaries = nexRad.listBucket(key);
+        log.debug("Summaries size : " + s3ObjectSummaries.size());
+    }
+
+    private void printBanner() {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("banner.txt")))) {
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while((line = br.readLine()) !=null){
+                sb.append(line).append('\n');
+            }
+            log.info(sb.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.println(new String(outputStream.toByteArray()));
+
     }
 }
