@@ -24,6 +24,8 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import edu.iu.finch.core.NexRad;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) throws IOException {
         System.out.println("Hello from Finch!");
@@ -41,10 +44,8 @@ public class Main {
         System.out.println(summaries.size());
         System.out.println(summaries.get(0));
 
-        S3Object s3Object = nexRad.getS3Object("2016/01/01/FOP1/FOP120160101_000203_V07.gz");
-        System.out.println(s3Object);
-//        System.out.println(s3Object.getObjectMetadata());
-        S3ObjectInputStream s3InputStream = s3Object.getObjectContent();
+        String key = "2016/01/01/FOP1/FOP120160101_000203_V07.gz";
+        nexRad.getData(key);
 
         //print(s3InputStream);
 

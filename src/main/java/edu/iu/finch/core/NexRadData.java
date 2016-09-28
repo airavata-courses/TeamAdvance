@@ -18,33 +18,29 @@
  * under the License.
  *
  */
-package edu.iu.finch.api;
+package edu.iu.finch.core;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.Length;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Saying {
-    private long id;
 
-    @Length(max = 3)
-    private String content;
+public class NexRadData {
 
-    public Saying(){
-        // Jackson deserialization
+    Map<String, String> data = new HashMap<>();
+
+    public NexRadData() {
+
     }
 
-    public Saying(long _id, String _content){
-        this.id = _id;
-        this.content = _content;
+    public void addData(String key, String value) {
+        data.put(key, value);
     }
 
-    @JsonProperty
-    public long getId(){
-        return id;
+    public Map<String,String> getData(){
+        return data;
     }
 
-    @JsonProperty
-    public String getContent(){
-        return content;
+    public String getData(String key) {
+        return data.get(key);
     }
 }

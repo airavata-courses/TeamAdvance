@@ -3,13 +3,13 @@ version '0.0.1-SNAPSHOT'
 description 'Finch Project'
 
 apply plugin: 'java'
-apply plugin: 'idea'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 repositories {
 //    maven { url "http://oss.sonatype.org/content/repositories/snapshots" }
+//    maven { url "http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases" }
     mavenCentral()
 }
 project.ext {
@@ -17,13 +17,10 @@ project.ext {
 }
 
 dependencies {
-    compile (
-            'io.dropwizard:dropwizard-core:' + dropwizardVersion,
-            'io.dropwizard.metrics:metrics-annotation:3.1.2',
-            'io.dropwizard.metrics:metrics-healthchecks:3.1.2',
-            'org.hibernate:hibernate-validator:5.2.4.Final',
-            'com.fasterxml.jackson.core:jackson-annotations:2.7.6',
+    compile(
             'com.amazonaws:aws-java-sdk-s3:1.11.11',
+             //'edu.ucar:netcdf4:4.6.6',
+            'edu.ucar:netcdf4:4.5.5',
             'org.slf4j:slf4j-api:1.7.10'
     )
 
